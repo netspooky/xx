@@ -70,6 +70,7 @@ Version 0.2 of `xx` is the simple version that I've personally been using and te
 - [ ] Other number formats, WinDbg style: 0n11 = decimal 11, 0y11 = decimal 3.
 - [ ] ANSI formatting for data
 - [ ] Command and Macro interface
+- [ ] An official file format specification
 
 Eventually I will combine this with the yxd project: https://github.com/netspooky/yxd
 
