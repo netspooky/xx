@@ -59,5 +59,7 @@ Version 0.2 of `xx` is the simple version that I've personally been using and te
 - [ ] ANSI formatting for data
 - [ ] Command and Macro interface
 
+Eventually I will combine this with the yxd project: https://github.com/netspooky/yxd
+
 If you have any suggestions or ideas, feel free to submit an issue or a PR, or message me on twitter: [@netspooky_](https://twitter.com/netspooky_)
 
