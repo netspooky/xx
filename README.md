@@ -49,13 +49,16 @@ Comments are a major component of .xx files. You can use a number of standard co
 
 Current list of comments:
 ```
---
-//
-#
-;
-%
-|
-All of the box drawing characters
+-- Lua Style
+// C Style
+# Python Style
+; Nasm Style
+% MATLAB, PDF 
+| Pipes
+┌─┬┐╔═╦╗╓╥  Any box drawing 
+╖╒╤╕│║├┼┤╠  character can also
+╬╣╟╫╢╞╪╡└┴  be used as a comment.
+┘╚╩╝╙╨╜╘╧╛  Perfect for diagrams!
 ```
 
 ## Roadmap
