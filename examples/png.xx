@@ -1,0 +1,34 @@
+┌─ png.xx ── Generates png.5e86c4ab.bin ────────────────────────
+│ From https://garethrees.org/2007/11/14/pngcrush/
+│ REF: http://www.libpng.org/pub/png/spec/1.2/PNG-Structure.html
+└───────────────────────────────────────────────────────────────
+
+-- 8 byte PNG Magic
+89 "PNG" 0d0a 1a0a
+
+-- IHDR
+  0000 000d -- IHDR Length
+  "IHDR"    -- IHDR Marker
+  0000 0001 ─┐ 
+  0000 0001  │
+  0100 0000  │ IHDR Chunk Data (13 bytes)
+  0037 6ef9  │
+  24        ─┘
+
+-- IDAT
+  0000 0010 -- IDAT Length
+  "IDAT"    -- IDAT Marker (has a 16 byte header)
+  78        -- The header byte 78 meaning "deflate compression with a 32 KiB window".
+  9c        -- Informational byte 9c meaning "the default compression algorithm was used" (plus a checksum).
+
+  6260 0100 ─┐
+  0000 ffff  │ 10 bytes of compressed data
+  0300      ─┘
+
+  0006 0005 -- 4-byte Adler32 checksum
+  57bf abd4 -- CRC32 of IDAT
+
+-- IEND
+  0000 0000 -- IEND Length
+  "IEND"    -- IEND Marker
+  ae42 6082 -- CRC32 of IEND
