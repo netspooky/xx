@@ -50,7 +50,9 @@ Comments are a major component of .xx files. You can use a number of standard co
 Current list of comments:
 ```
 -- Lua Style
-// C Style
+/* C multi-
+line Style */
+// C++ Style
 # Python Style
 ; Nasm Style
 % MATLAB, PDF 
