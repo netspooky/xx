@@ -56,6 +56,42 @@ def filterComments(inText):
         inText = inText.replace(f,"")
     return inText
 
+"""
+inputs:
+    multilineComment: are we currently within a multi-line comment (initial value: False)
+    joinedLine: incremental fragments around multi-line comment (initial value: "")
+    line: the current line to filter
+outputs:
+    multilineComment: updated accordingly
+    joinedLine: updated accordingly
+    lineResult: filtered line ready to consume, if mustContinue is False
+    mustContinue: if True, the caller must continue / loop to get a new line
+"""
+def filterMultLineComments(multilineComment, joinedLine, line):
+    lineResult = joinedLine
+    joinedLine = ""
+    mustContinue = False
+    while len(line) > 0:
+        if multilineComment:
+            if "*/" in line:
+                l = line.split("*/")
+                line = "*/".join(l[1:])
+                multilineComment = False
+            else:
+                joinedLine += lineResult
+                mustContinue = True
+                break
+        else:
+            if "/*" in line:
+                l = line.split("/*")
+                lineResult += l[0]
+                line = "/*".join(l[1:])
+                multilineComment = True
+            else:
+                lineResult += line
+                break
+    return multilineComment, joinedLine, lineResult, mustContinue
+
 if __name__ == '__main__':
     args = parser.parse_args()
     inFile = args.inFile
@@ -66,9 +102,15 @@ if __name__ == '__main__':
     with open(inFile,"r") as f:
         xxFile = f.readlines()
 
+    multilineComment = False
+    joinedLine = ""
     lineNum = 0
     for line in xxFile:
+        origLine = line
         lineNum = lineNum + 1
+        multilineComment, joinedLine, line, mustContinue = filterMultLineComments(multilineComment, joinedLine, line)
+        if mustContinue:
+            continue
         try:
             for comment in comments:
                 if comment in line:
@@ -78,7 +120,7 @@ if __name__ == '__main__':
             out += bytes.fromhex(line)
         except Exception as e:
             print(f"Syntax Error on Line: {lineNum}")
-            print(f"Line {lineNum}: {line}\n")
+            print(f"Line {lineNum}: {origLine}\n")
             print(e)
             sys.exit(1)
 
