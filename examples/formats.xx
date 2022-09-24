@@ -1,0 +1,8 @@
+0x41, 0x41, 0x41, 0x41 -- Hex list
+$42, $42, $42, $42     -- 8 Bit
+43434343               -- Long hex string
+44 44 4444             -- Spaced out bytes (any size) 
+\x45\x45\x45\x45       -- C-style
+46h 46h 46h 46h        -- asm style
+47:47:47:47            -- MAC Address style
+"This is a string"     -- Plain old string, must use double quotes!
