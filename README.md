@@ -4,9 +4,9 @@
 
 ## Who Is This For?
 
-The `xx` format was designed for those who need to describe, annotate, or simply write binary data in a text file. 
+The `xx` format was designed for those who need to describe, annotate, or simply write binary data in a text file, and turn it into binary data.
 
-This can usually be done with either an assembler, or a tool that can parse hex dumps and transform them into a binary file. The main limitation of these tools is that you need to follow the semantics of either the assembler or the hex dump format in order to build your file the way you want.
+This can usually be done with either an assembler, or a tool that can parse hex dumps and transform them into a binary file. The main limitation of these tools is that you need to follow the semantics of either the assembler or the hex dump format in order to build your file the way you want. Alternatively you can script out something to create a buffer for you, but this also relies on following the data representation rules for that scripting language.
 
 With `xx`, there is a lot more freedom for how you can to write your data. The aim is to be an extensible, reliable format for portable binary data descriptions.
 
