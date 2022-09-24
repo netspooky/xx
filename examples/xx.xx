@@ -22,7 +22,9 @@ $42, $42, $42, $42     │ 8 Bit
 │ Currently, multi line comments aren't supported
 └─────────────────────────────────────────────────────
 -- Lua Style
-// C Style
+/* C multi-
+line Style */
+// C++ Style
 # Python Style
 ; Nasm Style
 % MATLAB, PDF 
