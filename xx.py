@@ -18,12 +18,10 @@ comments = [ "--", "//", "#", ";", "%", "|",
 
 filterList = [",","$","\\x","0x","h",":"," "]
 
-def writeBin(b,h,f):
-    f = f.split(".xx")[0]
-    outfile = f + "." + h + ".bin"
-    f = open(outfile,'wb')
-    f.write(b)
-    f.close()
+def writeBin(b,h,file_name):
+    outfile = f"{file_name.split('.xx')[0]}.{h}.bin"
+    with open(outfile,'wb') as f:
+        f.write(b)
     print(outfile)
 
 def dHex(inBytes):
