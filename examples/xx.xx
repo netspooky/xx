@@ -1,0 +1,34 @@
+; xx.xx -- xx file format explainer
+
+┌─ Data Formats ───────────────────────────────────────
+│ A variety of data formats are supported in xx.
+│ The main ones are various hex representations,
+│ but simple strings are also supported.
+└──────────────────────┐
+0x41, 0x41, 0x41, 0x41 │ Hex list
+$42, $42, $42, $42     │ 8 Bit
+43434343               │ Long hex string
+44 44 4444             │ Spaced out bytes (any size) 
+\x45\x45\x45\x45       │ C-style
+46h 46h 46h 46h        │ asm style
+47:47:47:47            │ MAC Address style
+┌──────────────────────┘
+│ Strings should be wrapped in double quotes!
+└────────────────────────────────┐
+"This is a string" -- Like this! │
+┌─ Comments ─────────────────────┘
+│ Comments are a very important part of the xx format.
+│ There are many different comments available.
+│ Currently, multi line comments aren't supported
+└─────────────────────────────────────────────────────
+-- Lua Style
+// C Style
+# Python Style
+; Nasm Style
+% MATLAB, PDF 
+| Pipes
+┌─┬┐╔═╦╗╓╥  Any box drawing 
+╖╒╤╕│║├┼┤╠  character can also
+╬╣╟╫╢╞╪╡└┴  be used as a comment.
+┘╚╩╝╙╨╜╘╧╛  Perfect for diagrams!
+
