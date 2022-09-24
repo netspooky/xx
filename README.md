@@ -36,6 +36,13 @@ The primary format for data is ASCII hex bytes. These can be represented in a nu
     47:47:47:47            -- MAC Address style
     "This is a string"     -- Plain old string, must use double quotes!
 
+Output:
+
+    $ python3 xx.py formats.xx -x
+    00000000: 41 41 41 41 42 42 42 42 43 43 43 43 44 44 44 44  AAAABBBBCCCCDDDD
+    00000010: 45 45 45 45 46 46 46 46 47 47 47 47 54 68 69 73  EEEEFFFFGGGGThis
+    00000020: 20 69 73 20 61 20 73 74 72 69 6E 67               is a string
+
 ## Comments
 
 Comments are a major component of .xx files. You can use a number of standard comment delimiters to take notes about bytes. 
