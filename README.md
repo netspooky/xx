@@ -22,6 +22,8 @@ You can use the `-x` flag to do a simple hex dump to verify the contents of your
 
 There are several example files in this repo for you to play with if you need some inspiration.
 
+You can use [yxd](https://github.com/netspooky/yxd) to create an `xx` compatible hex dump to work with.
+
 ## Data Representation
 
 The primary format for data is ASCII hex bytes. These can be represented in a number of common hex formats.
