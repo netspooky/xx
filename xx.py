@@ -7,9 +7,9 @@ parser = argparse.ArgumentParser(description="xx")
 parser.add_argument('inFile', help='File to open')
 parser.add_argument('-x', dest='dumpHex', help='Dump hex instead of writing file', action="store_true")
 
-xxVersion = "0.2"
+xxVersion = "0.3"
 
-comments = [ "--", "//", "#", ";", "%", "|",
+comments = [ "--", "//", "#", ";", "%", "|","\x1b",
              "┌","─","┬","┐","╔","═","╦","╗","╓","╥",
              "╖","╒","╤","╕","│","║","├","┼","┤","╠",
              "╬","╣","╟","╫","╢","╞","╪","╡","└","┴",
@@ -32,9 +32,9 @@ def dHex(inBytes):
         bChunk = inBytes[offs:offs+16]
         for b in bChunk:
             bAsc += chr(b) if chr(b).isprintable() and b < 0x7F else '.'
-            bHex += "{:02X} ".format(b)
+            bHex += "{:02x} ".format(b)
         sp = " "*(48-len(bHex))
-        print("{:08X}: {}{} {}".format(offs, bHex, sp, bAsc))
+        print("{:08x}: {}{} {}".format(offs, bHex, sp, bAsc))
         offs = offs + 16
 
 def repl(matchobj):
@@ -90,16 +90,15 @@ def filterMultLineComments(multilineComment, joinedLine, line):
                 break
     return multilineComment, joinedLine, lineResult, mustContinue
 
-if __name__ == '__main__':
-    args = parser.parse_args()
-    inFile = args.inFile
-    dumpHex = args.dumpHex
 
-    out = b""
-
-    with open(inFile,"r") as f:
-        xxFile = f.readlines()
-
+"""
+inputs: 
+  xxFile -- a list of lines from an xx file to parse
+outputs: 
+  xxOut -- a binary buffer of compiled hex data from the xx file
+"""
+def parseXX(xxFile):
+    xxOut = b""
     multilineComment = False
     joinedLine = ""
     lineNum = 0
@@ -112,15 +111,28 @@ if __name__ == '__main__':
         try:
             for comment in comments:
                 if comment in line:
-                    line = line.split(comment)[0]    
+                    line = line.split(comment)[0]
             line = parseString(line)
             line = filterComments(line)
-            out += bytes.fromhex(line)
+            xxOut += bytes.fromhex(line)
         except Exception as e:
             print(f"Syntax Error on Line: {lineNum}")
             print(f"Line {lineNum}: {origLine}\n")
             print(e)
             sys.exit(1)
+    return xxOut
+
+if __name__ == '__main__':
+    args = parser.parse_args()
+    inFile = args.inFile
+    dumpHex = args.dumpHex
+
+    out = b""
+
+    with open(inFile,"r") as f:
+        xxFile = f.readlines()
+
+    out = parseXX(xxFile)
 
     if dumpHex:
         dHex(out)
@@ -129,3 +141,4 @@ if __name__ == '__main__':
         m.update(out)
         shorthash = m.digest().hex()[0:8]
         writeBin(out,shorthash,inFile)
+

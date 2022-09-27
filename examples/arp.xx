@@ -1,0 +1,16 @@
+[38;5;38marp.xx -- Creates arp.4cc3ae7e.bin -- 20220926 -- @netspooky_ [0m
+[38;5;38mARP packet from [38;5;226mhttps://github.com/netspooky/protocols/tree/main/broadcast_brujeria[0m
+                   ┌─ Ethernet Layer ─┐
+ff ff ff ff ff ff  [38;5;231m[48;5;32meth.dst           [0m │ [38;5;32mDestination Mac Address:[0m ff:ff:ff:ff:ff:ff
+00 11 22 33 44 55  [38;5;231m[48;5;68meth.src           [0m │ [38;5;68mSource MAC Address:[0m 00:11:22:33:44:55
+08 06              [38;5;231m[48;5;104meth.type          [0m ┘ [38;5;104mPacket Type:[0m ARP
+00 01              [38;5;231m[48;5;140marp.hw.type       [0m ┐ [38;5;140mHardware Type:[0m Ethernet
+08 00              [38;5;231m[48;5;176marp.proto.type    [0m │ [38;5;176mProtocol Type:[0m IPv4
+06                 [38;5;231m[48;5;212marp.hw.size       [0m │ [38;5;212mHardware Size:[0m 6
+04                 [38;5;231m[48;5;213marp.proto.size    [0m │ [38;5;213mProtocol Size:[0m 4
+00 01              [38;5;231m[48;5;177marp.opcode        [0m │ [38;5;177mOpcode:[0m Request
+00 11 22 33 44 55  [38;5;231m[48;5;141marp.src.hw_mac    [0m │ [38;5;141mSource MAC Address:[0m 00:11:22:33:44:55
+0a 00 01 0a        [38;5;231m[48;5;105marp.src.proto_ipv4[0m │ [38;5;105mSource IP:[0m 10.0.1.10
+00 00 00 00 00 00  [38;5;231m[48;5;69marp.dst.hw_mac    [0m │ [38;5;69mTarget MAC Address:[0m ff:ff:ff:ff:ff:ff
+0a 00 01 0b        [38;5;231m[48;5;33marp.dst.proto_ipv4[0m │ [38;5;33mTarget IP:[0m 10.0.1.11
+                   └─ ARP Layer ──────┘
