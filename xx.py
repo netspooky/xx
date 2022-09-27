@@ -49,7 +49,13 @@ def parseString(inText):
     result3 = re.sub(strPattern, repl, inText)
     return result3
 
-def filterComments(inText):
+"""
+inputs:
+    inText: This contains a line from the data section of an xx file.
+outputs:
+    inText: This is the line without the ignored characters in the filterList
+"""
+def filterIgnored(inText):
     for f in filterList:
         inText = inText.replace(f,"")
     return inText
@@ -113,7 +119,7 @@ def parseXX(xxFile):
                 if comment in line:
                     line = line.split(comment)[0]
             line = parseString(line)
-            line = filterComments(line)
+            line = filterIgnored(line)
             xxOut += bytes.fromhex(line)
         except Exception as e:
             print(f"Syntax Error on Line: {lineNum}")
