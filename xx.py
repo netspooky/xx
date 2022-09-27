@@ -111,6 +111,7 @@ def parseXX(xxFile):
     for line in xxFile:
         origLine = line
         lineNum = lineNum + 1
+        line = parseString(line)
         multilineComment, joinedLine, line, mustContinue = filterMultLineComments(multilineComment, joinedLine, line)
         if mustContinue:
             continue
@@ -118,7 +119,6 @@ def parseXX(xxFile):
             for comment in comments:
                 if comment in line:
                     line = line.split(comment)[0]
-            line = parseString(line)
             line = filterIgnored(line)
             xxOut += bytes.fromhex(line)
         except Exception as e:
