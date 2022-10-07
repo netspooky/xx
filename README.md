@@ -74,6 +74,10 @@ Version 0.2 of `xx` is the simple version that I've personally been using and te
 - [ ] Command and Macro interface
 - [ ] An official file format specification
 
+Version 0.3 adds ANSI formatting and multiline comments.
+
+Version 0.4 adds all the unicode Box Drawing Character and Block Elements as comments and an updated codebase that is easier to work with.
+
 Eventually I will combine this with the yxd project: https://github.com/netspooky/yxd
 
 If you have any suggestions or ideas, feel free to submit an issue or a PR, or message me on twitter: [@netspooky_](https://twitter.com/netspooky_)
