@@ -82,5 +82,5 @@ Version 0.4 adds all the unicode Box Drawing Character and Block Elements as com
 
 Eventually I will combine this with the yxd project: https://github.com/netspooky/yxd
 
-If you have any suggestions or ideas, feel free to submit an issue or a PR, or message me on twitter: [@netspooky_](https://twitter.com/netspooky_)
+If you have any suggestions or ideas, feel free to submit an issue or a PR, or message me on twitter: [@netspooky](https://twitter.com/netspooky)
 
