@@ -63,6 +63,8 @@ line Style */
 ╖╒╤╕│║├┼┤╠  character can also
 ╬╣╟╫╢╞╪╡└┴  be used as a comment.
 ┘╚╩╝╙╨╜╘╧╛  Perfect for diagrams!
+▀▁▂▃▄▅▆▇█▉▊▋▌▍▎▏ Any block element 
+▐░▒▓▔▕▖▗▘▙▚▛▜▝▞▟ can also be used
 ```
 
 ## Roadmap
