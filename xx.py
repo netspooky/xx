@@ -2,7 +2,7 @@ import sys
 import hashlib
 import argparse
 
-parser = argparse.ArgumentParser(description="new xx")
+parser = argparse.ArgumentParser(description="xx")
 parser.add_argument('inFile', help='File to open')
 parser.add_argument('-x', dest='dumpHex', help='Dump hex instead of writing file', action="store_true")
 
