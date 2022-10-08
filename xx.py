@@ -135,7 +135,6 @@ class xxToken:
                     tempString = tempString.split('"')[1]
                 if self.isEnd:
                     tempString = tempString.split('"')[0]
-                print(f"gHFS: passing {tempString}EOD to a2h")
                 self.hexData = ascii2hex(tempString)
 ################################################################################
 def getTokenAttributes(inTok):
@@ -168,7 +167,6 @@ def ascii2hex(inString):
     """
     formatted = ""
     for char in inString:
-        
         hex_char = format(ord(char), "02x")
         formatted += hex_char
     return formatted
@@ -196,7 +194,6 @@ def testCharComment(inChar):
 
 ################################################################################
 def writeBin(b,h,file_name):
-    print(f"writebin received {b}EOD")
     """
     Writes the binary file
     """
@@ -204,7 +201,6 @@ def writeBin(b,h,file_name):
     with open(outfile,'wb') as f:
         f.write(b)
     print(outfile)
-
 def dHex(inBytes):
     """
     Does a simple hex dump, use yxd library later
@@ -268,7 +264,6 @@ def tokenizeXX(xxline, lineNum):
     buf = ""
     verbatim = False
     isEscape = False
-    
     for c in xxline:
         if c == "\\" and not isEscape and verbatim: # Interpret escape sequences
             isEscape = True
@@ -280,7 +275,7 @@ def tokenizeXX(xxline, lineNum):
         if c == '"':
             # When we find a quote, switch verbatim mode - this preserves
             # whitespace and comment characters inside strings
-            verbatim = not verbatim 
+            verbatim = not verbatim
             continue
         if c == " " and not verbatim:
             # We split, but only if we are not inside a string rn
@@ -291,13 +286,11 @@ def tokenizeXX(xxline, lineNum):
                     if k in buf:
                         isComment = True
                         break
-                print(f"token {buf} is a comment? {isComment}")
                 tokens.append(xxToken(buf, lineNum, isComment, False))
             buf = ""
             continue
         buf += c
     tokens.append(xxToken(buf, lineNum, False, False)) # Append last token on EOL
-    print(f"Line {xxline} => {tokens}")
     return tokens
 
 
@@ -318,9 +311,7 @@ def parseXX(xxFile):
         needsMore = 0
         linesHexData = ""
         for t in lineTokens:
-            print(f"parseXX: token is {t} hd={bytes(t.hexData, 'latin1')}")
             getTokenAttributes(t)
-            print(f"past GTA: {t}, hd={t.hexData}")
             if t.isComment or t.hasComment:
                 isComment = 1
                 break
@@ -328,11 +319,8 @@ def parseXX(xxFile):
                 needsMore = 1
             else:
                 needsMore = 0
-            print(f"parseXX: adding {t.hexData}EOD to lHD")
             linesHexData += t.hexData
-            print(f"parseXX: lHD is {linesHexData}EOD")
         xxOut += bytes.fromhex(linesHexData)
-        print(f"xxout is {xxOut}")
     return xxOut
 
 if __name__ == '__main__':
