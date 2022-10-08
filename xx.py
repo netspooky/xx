@@ -38,7 +38,8 @@ class xxToken:
         self.hexData = ""  # This is the fully parsed hex data that is passed to the main buffer to output
         self.hexDataLen = 0 # !! UNUSED, The length of the hex data, should match the length of normData
     def __str__(self):
-        return f"t\"{self.rawData}\""
+        byterepr = bytes(self.rawData, 'latin1')
+        return f"t\"{byterepr}\""
     def __repr__(self):
         byterepr = bytes(self.rawData, 'latin1')
         return f"xxToken({byterepr}, lineNum={self.lineNum}, isComment={self.isComment})"
@@ -113,9 +114,13 @@ class xxToken:
             tempData = filterIgnored(self.normData)
             try:
                 testHex = bytes.fromhex(tempData)
-                self.isHex = 1
-                self.hexData = tempData
-                self.normData = tempData
+                if(len(testHex) != 0):
+                    # If we pass a string containing whitespace to bytes.fromhex()
+                    # it returns an empyty bytes object. We have to fail that or we
+                    # lose the whitespace
+                    self.isHex = 1
+                    self.hexData = tempData
+                    self.normData = tempData
             except:
                 return
     def getHexFromString(self):
@@ -130,6 +135,7 @@ class xxToken:
                     tempString = tempString.split('"')[1]
                 if self.isEnd:
                     tempString = tempString.split('"')[0]
+                print(f"gHFS: passing {tempString}EOD to a2h")
                 self.hexData = ascii2hex(tempString)
 ################################################################################
 def getTokenAttributes(inTok):
@@ -190,6 +196,7 @@ def testCharComment(inChar):
 
 ################################################################################
 def writeBin(b,h,file_name):
+    print(f"writebin received {b}EOD")
     """
     Writes the binary file
     """
@@ -261,6 +268,7 @@ def tokenizeXX(xxline, lineNum):
     buf = ""
     verbatim = False
     isEscape = False
+    
     for c in xxline:
         if c == "\\" and not isEscape and verbatim: # Interpret escape sequences
             isEscape = True
@@ -278,11 +286,18 @@ def tokenizeXX(xxline, lineNum):
             # We split, but only if we are not inside a string rn
             if buf != "":
                 # Avoid creating empty tokens if spaces are repeated.
-                tokens.append(xxToken(buf, lineNum, False, False))
+                isComment = False
+                for k in asciiComments + twoCharComments:
+                    if k in buf:
+                        isComment = True
+                        break
+                print(f"token {buf} is a comment? {isComment}")
+                tokens.append(xxToken(buf, lineNum, isComment, False))
             buf = ""
             continue
         buf += c
     tokens.append(xxToken(buf, lineNum, False, False)) # Append last token on EOL
+    print(f"Line {xxline} => {tokens}")
     return tokens
 
 
@@ -303,15 +318,21 @@ def parseXX(xxFile):
         needsMore = 0
         linesHexData = ""
         for t in lineTokens:
+            print(f"parseXX: token is {t} hd={bytes(t.hexData, 'latin1')}")
             getTokenAttributes(t)
+            print(f"past GTA: {t}, hd={t.hexData}")
             if t.isComment or t.hasComment:
                 isComment = 1
+                break
             if t.needsMore:
                 needsMore = 1
             else:
                 needsMore = 0
+            print(f"parseXX: adding {t.hexData}EOD to lHD")
             linesHexData += t.hexData
+            print(f"parseXX: lHD is {linesHexData}EOD")
         xxOut += bytes.fromhex(linesHexData)
+        print(f"xxout is {xxOut}")
     return xxOut
 
 if __name__ == '__main__':
