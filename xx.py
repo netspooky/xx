@@ -6,12 +6,14 @@ parser = argparse.ArgumentParser(description="xx")
 parser.add_argument('inFile', help='File to open')
 parser.add_argument('-x', dest='dumpHex', help='Dump hex instead of writing file', action="store_true")
 
-xxVersion = "0.4"
+xxVersion = "0.4.1"
 
 # Comments - The box drawing comments are generated when checking a token
 asciiComments = [ "#", ";", "%", "|","\x1b", "-", "/" ]
 twoCharComments = [ "--", "//", ]
 filterList = [",","$","\\x","0x","h",":"," "]
+# XXX: Add rest of the escape sequences, what do we support here?
+escapes = {"n":"\n", "\\":"\\", "t":"\t", "r":"\r"} # List of escape sequences to be interpreted when parsing quoted strings  
 
 class xxToken:
     """
@@ -35,6 +37,12 @@ class xxToken:
         self.isEnd = 0     # If the line ends with a double quote, this is marked as the end
         self.hexData = ""  # This is the fully parsed hex data that is passed to the main buffer to output
         self.hexDataLen = 0 # !! UNUSED, The length of the hex data, should match the length of normData
+    def __str__(self):
+        byterepr = bytes(self.rawData, 'latin1')
+        return f"t\"{byterepr}\""
+    def __repr__(self):
+        byterepr = bytes(self.rawData, 'latin1')
+        return f"xxToken({byterepr}, lineNum={self.lineNum}, isComment={self.isComment})"
     def testASCII(self):
         """
         Tests if the token can be decoded as ASCII
@@ -106,9 +114,13 @@ class xxToken:
             tempData = filterIgnored(self.normData)
             try:
                 testHex = bytes.fromhex(tempData)
-                self.isHex = 1
-                self.hexData = tempData
-                self.normData = tempData
+                if(len(testHex) != 0):
+                    # If we pass a string containing whitespace to bytes.fromhex()
+                    # it returns an empyty bytes object. We have to fail that or we
+                    # lose the whitespace
+                    self.isHex = 1
+                    self.hexData = tempData
+                    self.normData = tempData
             except:
                 return
     def getHexFromString(self):
@@ -124,7 +136,6 @@ class xxToken:
                 if self.isEnd:
                     tempString = tempString.split('"')[0]
                 self.hexData = ascii2hex(tempString)
-
 ################################################################################
 def getTokenAttributes(inTok):
     """
@@ -156,7 +167,7 @@ def ascii2hex(inString):
     """
     formatted = ""
     for char in inString:
-        hex_char = format(ord(char), "x")
+        hex_char = format(ord(char), "02x")
         formatted += hex_char
     return formatted
 
@@ -190,7 +201,6 @@ def writeBin(b,h,file_name):
     with open(outfile,'wb') as f:
         f.write(b)
     print(outfile)
-
 def dHex(inBytes):
     """
     Does a simple hex dump, use yxd library later
@@ -245,6 +255,50 @@ def filterMultLineComments(multilineComment, joinedLine, line):
     return multilineComment, joinedLine, lineResult, mustContinue
 
 ################################################################################
+def tokenizeXX(xxline, lineNum):
+    # We cannot just split() the string, since it will corrupt repeated whitespace
+    # We have to interpret quoted string verbatim with no changes.
+    # XXX: newline.xx: Comment gets inserted into file; "\n" error
+    xxline = xxline.strip()
+    tokens = []
+    buf = ""
+    verbatim = False
+    isEscape = False
+    for c in xxline:
+        if c == "\\" and not isEscape and verbatim: # Interpret escape sequences
+            isEscape = True
+            continue
+        if isEscape:
+            # if an escape sequence is known then replace it, otherwise copy as is
+            if c in escapes:
+                buf += escapes[c]
+            else:
+                buf += "\\"
+                buf += c
+            isEscape = False
+            continue
+        if c == '"':
+            # When we find a quote, switch verbatim mode - this preserves
+            # whitespace and comment characters inside strings
+            verbatim = not verbatim
+            continue
+        if c == " " and not verbatim:
+            # We split, but only if we are not inside a string rn
+            if buf != "":
+                # Avoid creating empty tokens if spaces are repeated.
+                isComment = False
+                for k in asciiComments + twoCharComments:
+                    if k in buf:
+                        isComment = True
+                        break
+                tokens.append(xxToken(buf, lineNum, isComment, False))
+            buf = ""
+            continue
+        buf += c
+    tokens.append(xxToken(buf, lineNum, False, False)) # Append last token on EOL
+    return tokens
+
+
 def parseXX(xxFile):
     commentList = getCommentList()
     xxOut = b""
@@ -257,15 +311,15 @@ def parseXX(xxFile):
         multilineComment, joinedLine, line, mustContinue = filterMultLineComments(multilineComment, joinedLine, line)
         if mustContinue:
             continue
-        lineTokens = line.split()
+        lineTokens = tokenizeXX(line, lineNum)
         isComment = 0
         needsMore = 0
         linesHexData = ""
-        for lToken in lineTokens:
-            t = xxToken(lToken,lineNum,isComment,needsMore)
+        for t in lineTokens:
             getTokenAttributes(t)
             if t.isComment or t.hasComment:
                 isComment = 1
+                break
             if t.needsMore:
                 needsMore = 1
             else:
