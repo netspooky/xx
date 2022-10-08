@@ -269,7 +269,12 @@ def tokenizeXX(xxline, lineNum):
             isEscape = True
             continue
         if isEscape:
-            buf += escapes[c]
+            # if an escape sequence is known then replace it, otherwise copy as is
+            if c in escapes:
+                buf += escapes[c]
+            else:
+                buf += "\\"
+                buf += c
             isEscape = False
             continue
         if c == '"':
