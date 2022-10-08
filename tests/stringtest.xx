@@ -1,0 +1,11 @@
+"This is a normal stringxxxxxxxxx" 0x00 12 34h $56 \x78   ;; Normal string
+"This string contains    4 spaces"    ;; These spaces will be preserved
+"A comment -- inside a stringAAAA"    ;; This comment needs to be preserved
+"    whitespace x4,either end    "    ;; The whitespace needs to be there
+"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa	" ;; The last characted here is a literal tab
+"Test escapes \t\n\r"		
+"Many" "strings" "no" "spaces"
+"\n"  ;; This needs to generate 0a
+
+
+;; The shasum of the resulting file must be stringtest.47a56fa6.bin
