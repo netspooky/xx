@@ -8,7 +8,7 @@ parser.add_argument('-x', dest='dumpHex', help='Dump hex instead of writing file
 parser.add_argument('-o', dest='outFile', help='Output Filename')
 parser.add_argument('-r', dest='rawOut', help='Dump buffer to stdout instead of writing file', action="store_true")
 
-xxVersion = "0.4.4"
+xxVersion = "0.4.5"
 
 # Comments - The box drawing comments are generated when checking a token
 asciiComments = [ "#", ";", "%", "|","\x1b", "-", "/" ]
@@ -21,26 +21,20 @@ class xxToken:
     """
     Class to hold all xxTokens in a given line
     """
-    def __init__(self, inData, lineNum, isComment, isString, needsMore):
+    def __init__(self, inData, lineNum, isComment, isString):
+        # Data
         self.lineNum = lineNum # The line number
         self.rawData = inData # This is the raw token data. Save a copy of this and don't touch it.
         self.rawDataLen = len(inData) # This is the length of the raw token data. Save a copy of this and don't touch it
         self.normData = inData # This is where normalized data goes and is what is modified as the token is parsed
         self.normDataLen = len(inData) # This will be modified if normData is modified
-        self.isHexString = 0 # This means that it's a classic hex string like 41414141
-        self.isBinary = 0
-        self.isString = isString
-        self.isAscii = 0 # This supercedes isUtf8 because all Python3 strings are technically UTF-8
-        self.isUtf8 = 0 # If the line contains UTF8 data this can go here
-        self.isShiftJis = 0 # !! UNUSED, will figure out a way to implement
-        self.isComment = isComment # This tracks if the token itself should be classified as a comment
-        self.hasComment = 0 # This tracks if the token contains a comment, and everything else after is a comment
-        #REMOVEself.commentOffset = 0 # !! UNUSED, was going to track where in the token the comment occured
-        self.isStart = 0   # For strings, this is set to 1 if it's the beginning of a string
-        self.needsMore = needsMore # Since strings can have spaces, if it's split up, it can be reconstructed here
-        self.isEnd = 0     # If the line ends with a double quote, this is marked as the end
         self.hexData = ""  # This is the fully parsed hex data that is passed to the main buffer to output
-        #REMOVEself.hexDataLen = 0 # !! UNUSED, The length of the hex data, should match the length of normData
+        # State 
+        self.isString = isString # Is this token a string?
+        self.isAscii = 0 # Does this token contain ASCII data?
+        self.isComment = isComment # Is this token a comment?
+        self.hasComment = 0 # Does this token contain a comment?
+
     def __str__(self):
         byterepr = bytes(self.rawData, 'latin1')
         return f"t\"{byterepr}\""
@@ -56,36 +50,10 @@ class xxToken:
                 self.isAscii = 1
         except:
             return
-    def testUtf8(self):
-        """
-        Tests if the token contains UTF-8 characters
-        """
-        try:
-            if self.normData.encode("utf-8"):
-                self.isUtf8 = 1
-        except:
-            return
-    def testString(self):
-        """
-        Tests if the token should be interpreted as a string
-        """
-        if '"' in self.normData:
-            if self.normData[0] == '"':
-                self.isStart = 1
-            if self.normData[-1] == '"':
-                self.isEnd = 1
-            else:
-                self.needsMore = 1
-                self.normData += " " # Add a space to fix the string
-        elif self.needsMore:
-            if self.normData[-1] == '"':
-                self.isEnd = 1
-            else:
-                self.needsMore = 1
-                self.normData += " " # Add a space to fix the string
     def testComment(self):
         """
         Test if a token either is a comment, or contains comments.
+        Some may be missed in the first pass so we double check here.
         """
         if self.normDataLen > 0:
             firstCharComment = testCharComment(self.normData[0]) # This tests the first char
@@ -125,21 +93,16 @@ class xxToken:
                     self.isHex = 1
                     self.hexData = tempData
                     self.normData = tempData
+                    self.normDataLen = len(tempData)
             except:
                 return
     def getHexFromString(self):
         """
         This takes double quote enclosed string data and converts it to hexData
         """
-        tempString = self.normData
-        hexDataOut = ""
         if self.isAscii and len(self.hexData) == 0:
             if self.isComment == 0:
-                if self.isStart:
-                    tempString = tempString.split('"')[1]
-                if self.isEnd:
-                    tempString = tempString.split('"')[0]
-                self.hexData = ascii2hex(tempString)
+                self.hexData = ascii2hex(self.normData)
     def testBinary(self):
         if self.isString == False:
             if len(self.normData) == 10:
@@ -156,8 +119,6 @@ def getTokenAttributes(inTok):
     Sets various token attributes
     """
     inTok.testASCII()
-    inTok.testUtf8()
-    inTok.testString() # Remove this whole test
     inTok.testComment()
     inTok.testBinary()
     inTok.testHexData()
@@ -308,12 +269,12 @@ def tokenizeXX(xxline, lineNum):
                     if k in buf:
                         isComment = True
                         break
-                tokens.append(xxToken(buf, lineNum, isComment, isString, False))
+                tokens.append(xxToken(buf, lineNum, isComment, isString))
                 isString = False
             buf = ""
             continue
         buf += c
-    tokens.append(xxToken(buf, lineNum, False, isString, False)) # Append last token on EOL
+    tokens.append(xxToken(buf, lineNum, False, isString)) # Append last token on EOL
     return tokens
 
 def parseXX(xxFile):
@@ -328,17 +289,12 @@ def parseXX(xxFile):
             continue
         lineTokens = tokenizeXX(line, lineNum)
         isComment = 0
-        needsMore = 0
         linesHexData = ""
         for t in lineTokens:
             getTokenAttributes(t)
             if t.isComment or t.hasComment:
                 isComment = 1
                 break
-            if t.needsMore:
-                needsMore = 1
-            else:
-                needsMore = 0
             linesHexData += t.hexData
         xxOut += bytes.fromhex(linesHexData)
     return xxOut

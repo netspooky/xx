@@ -1,5 +1,8 @@
 CHANGELOG
 
+v0.4.5 [2022-11-06]
+- Removed unused methods and other state tracking info that was no longer needed.
+
 v0.4.4 [2022-11-05]
 - Added 0y binary representation and mametchi.xx to demonstrate it.
 
