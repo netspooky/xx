@@ -1,0 +1,9 @@
+CHANGELOG
+
+v0.4.3 [2022-11-05]
+- Added -o flag to choose a filename output. Default behavior the same
+- Added -r flag to output to stdout instead of a file.
+
+v0.4.2 [2022-11-05]
+- Fixed a bug with valid hex data in a quote
+

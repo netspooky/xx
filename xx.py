@@ -5,8 +5,10 @@ import argparse
 parser = argparse.ArgumentParser(description="xx")
 parser.add_argument('inFile', help='File to open')
 parser.add_argument('-x', dest='dumpHex', help='Dump hex instead of writing file', action="store_true")
+parser.add_argument('-o', dest='outFile', help='Output Filename')
+parser.add_argument('-r', dest='rawOut', help='Dump buffer to stdout instead of writing file', action="store_true")
 
-xxVersion = "0.4.2"
+xxVersion = "0.4.3"
 
 # Comments - The box drawing comments are generated when checking a token
 asciiComments = [ "#", ";", "%", "|","\x1b", "-", "/" ]
@@ -194,13 +196,13 @@ def testCharComment(inChar):
         return 0
 
 ################################################################################
-def writeBin(b,h,file_name):
+def writeBin(outbuf,outfile):
     """
     Writes the binary file
     """
-    outfile = f"{file_name.split('.xx')[0]}.{h}.bin"
+    #outfile = f"{file_name.split('.xx')[0]}.{h}.bin"
     with open(outfile,'wb') as f:
-        f.write(b)
+        f.write(outbuf)
     print(outfile)
 def dHex(inBytes):
     """
@@ -333,13 +335,21 @@ if __name__ == '__main__':
     args = parser.parse_args()
     inFile = args.inFile
     dumpHex = args.dumpHex
+    outFile = args.outFile
+    rawOut = args.rawOut
     with open(inFile,"r") as f:
         xxFileLines = f.readlines()
     out = parseXX(xxFileLines)
     if dumpHex:
         dHex(out)
+    elif rawOut:
+        sys.stdout.buffer.write(out)
     else:
         m = hashlib.sha256()
         m.update(out)
         shorthash = m.digest().hex()[0:8]
-        writeBin(out,shorthash,inFile)
+        if outFile:
+            filename = outFile
+        else:
+            filename = f"{inFile.split('.xx')[0]}.{shorthash}.bin"
+        writeBin(out,filename)
