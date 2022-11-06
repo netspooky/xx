@@ -71,7 +71,7 @@ line Style */
 
 Version 0.2 of `xx` is the simple version that I've personally been using and testing, but I wanted more people to play with it before adding all the bells and whistles.
 
-- [ ] Other number formats, WinDbg style: 0n11 = decimal 11, 0y11 = decimal 3.
+- [x] Other number formats, WinDbg style: 0n11 = decimal 11, 0y11 = decimal 3.
 - [ ] ANSI formatting for data
 - [ ] Command and Macro interface
 - [ ] An official file format specification
@@ -85,5 +85,6 @@ If you have any suggestions or ideas, feel free to submit an issue or a PR, or m
 - Version 0.3 adds ANSI formatting and multiline comments.
 - Version 0.4 adds all the unicode Box Drawing Character and Block Elements as comments and an updated codebase that is easier to work with.
 - Version 0.4.1 fixes some issues with characters inside of ASCII strings
+- Version 0.5 adds binary numbers.
 
 
