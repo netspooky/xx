@@ -8,7 +8,7 @@ parser.add_argument('-x', dest='dumpHex', help='Dump hex instead of writing file
 parser.add_argument('-o', dest='outFile', help='Output Filename')
 parser.add_argument('-r', dest='rawOut', help='Dump buffer to stdout instead of writing file', action="store_true")
 
-xxVersion = "0.4.5"
+xxVersion = "0.5"
 
 # Comments - The box drawing comments are generated when checking a token
 asciiComments = [ "#", ";", "%", "|","\x1b", "-", "/" ]
@@ -19,7 +19,8 @@ escapes = {"n":"\n", "\\":"\\", "t":"\t", "r":"\r"} # List of escape sequences t
 
 class xxToken:
     """
-    Class to hold all xxTokens in a given line
+    Class to hold an xx token.
+    This is a text element with certain attributes that need to be tracked.
     """
     def __init__(self, inData, lineNum, isComment, isString):
         # Data
@@ -34,7 +35,6 @@ class xxToken:
         self.isAscii = 0 # Does this token contain ASCII data?
         self.isComment = isComment # Is this token a comment?
         self.hasComment = 0 # Does this token contain a comment?
-
     def __str__(self):
         byterepr = bytes(self.rawData, 'latin1')
         return f"t\"{byterepr}\""
@@ -88,7 +88,7 @@ class xxToken:
                 testHex = bytes.fromhex(tempData)
                 if(len(testHex) != 0):
                     # If we pass a string containing whitespace to bytes.fromhex()
-                    # it returns an empyty bytes object. We have to fail that or we
+                    # it returns an empty bytes object. We have to fail that or we
                     # lose the whitespace
                     self.isHex = 1
                     self.hexData = tempData
@@ -137,19 +137,9 @@ def getCommentList():
         cList.append(chr(c))
     return cList
 
-def ascii2hex(inString):
-    """
-    Convert ASCII string to hex
-    """
-    formatted = ""
-    for char in inString:
-        hex_char = format(ord(char), "02x")
-        formatted += hex_char
-    return formatted
-
 def filterIgnored(inText):
     """
-    This function filters out ignored characters
+    This function filters out ignored characters.
     """
     for f in filterList:
         inText = inText.replace(f,"")
@@ -169,6 +159,16 @@ def testCharComment(inChar):
         return 0
 
 ################################################################################
+def ascii2hex(inString):
+    """
+    Convert ASCII string to hex
+    """
+    formatted = ""
+    for char in inString:
+        hex_char = format(ord(char), "02x")
+        formatted += hex_char
+    return formatted
+
 def writeBin(outbuf,outfile):
     """
     Writes the binary file
@@ -177,6 +177,7 @@ def writeBin(outbuf,outfile):
     with open(outfile,'wb') as f:
         f.write(outbuf)
     print(outfile)
+
 def dHex(inBytes):
     """
     Does a simple hex dump, use yxd library later
@@ -193,7 +194,6 @@ def dHex(inBytes):
         print("{:08x}: {}{} {}".format(offs, bHex, sp, bAsc))
         offs = offs + 16
 ################################################################################
-
 """
 inputs:
     multilineComment: are we currently within a multi-line comment (initial value: False)

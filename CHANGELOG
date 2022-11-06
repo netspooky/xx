@@ -1,5 +1,8 @@
 CHANGELOG
 
+v0.5 [2022-11-06]
+- Clean up code and add example with v0.5 release notes
+
 v0.4.5 [2022-11-06]
 - Removed unused methods and other state tracking info that was no longer needed.
 
