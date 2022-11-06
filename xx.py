@@ -6,7 +6,7 @@ parser = argparse.ArgumentParser(description="xx")
 parser.add_argument('inFile', help='File to open')
 parser.add_argument('-x', dest='dumpHex', help='Dump hex instead of writing file', action="store_true")
 
-xxVersion = "0.4.1"
+xxVersion = "0.4.2"
 
 # Comments - The box drawing comments are generated when checking a token
 asciiComments = [ "#", ";", "%", "|","\x1b", "-", "/" ]
@@ -19,13 +19,14 @@ class xxToken:
     """
     Class to hold all xxTokens in a given line
     """
-    def __init__(self, inData, lineNum, isComment, needsMore):
+    def __init__(self, inData, lineNum, isComment, isString, needsMore):
         self.lineNum = lineNum # The line number
         self.rawData = inData # This is the raw token data. Save a copy of this and don't touch it.
         self.rawDataLen = len(inData) # This is the length of the raw token data. Save a copy of this and don't touch it
         self.normData = inData # This is where normalized data goes and is what is modified as the token is parsed
         self.normDataLen = len(inData) # This will be modified if normData is modified
         self.isHexString = 0 # This means that it's a classic hex string like 41414141
+        self.isString = isString
         self.isAscii = 0 # This supercedes isUtf8 because all Python3 strings are technically UTF-8
         self.isUtf8 = 0 # If the line contains UTF8 data this can go here
         self.isShiftJis = 0 # !! UNUSED, will figure out a way to implement
@@ -110,7 +111,7 @@ class xxToken:
         """
         This attempts to decode the buffer as hex, if it succeeds, self.hexData is filled and self.isHex is set
         """
-        if self.isComment == 0:
+        if self.isComment == 0 and self.isString == False:
             tempData = filterIgnored(self.normData)
             try:
                 testHex = bytes.fromhex(tempData)
@@ -143,7 +144,7 @@ def getTokenAttributes(inTok):
     """
     inTok.testASCII()
     inTok.testUtf8()
-    inTok.testString()
+    inTok.testString() # Remove this whole test
     inTok.testComment()
     inTok.testHexData()
     inTok.getHexFromString()
@@ -262,8 +263,9 @@ def tokenizeXX(xxline, lineNum):
     xxline = xxline.strip()
     tokens = []
     buf = ""
-    verbatim = False
-    isEscape = False
+    verbatim = False # Verbatim mode means we are interpreting data in a string
+    isEscape = False 
+    isString = False
     for c in xxline:
         if c == "\\" and not isEscape and verbatim: # Interpret escape sequences
             isEscape = True
@@ -281,6 +283,7 @@ def tokenizeXX(xxline, lineNum):
             # When we find a quote, switch verbatim mode - this preserves
             # whitespace and comment characters inside strings
             verbatim = not verbatim
+            isString = True # This flag indicates that this buffer was a string
             continue
         if c == " " and not verbatim:
             # We split, but only if we are not inside a string rn
@@ -291,22 +294,20 @@ def tokenizeXX(xxline, lineNum):
                     if k in buf:
                         isComment = True
                         break
-                tokens.append(xxToken(buf, lineNum, isComment, False))
+                tokens.append(xxToken(buf, lineNum, isComment, isString, False))
+                isString = False
             buf = ""
             continue
         buf += c
-    tokens.append(xxToken(buf, lineNum, False, False)) # Append last token on EOL
+    tokens.append(xxToken(buf, lineNum, False, isString, False)) # Append last token on EOL
     return tokens
 
-
 def parseXX(xxFile):
-    commentList = getCommentList()
-    xxOut = b""
+    xxOut = b"" 
     lineNum = 0
     joinedLine = ""
     multilineComment = False
     for line in xxFile:
-        origLine = line
         lineNum = lineNum + 1
         multilineComment, joinedLine, line, mustContinue = filterMultLineComments(multilineComment, joinedLine, line)
         if mustContinue:
