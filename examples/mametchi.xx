@@ -1,0 +1,21 @@
+-- mametchi.xx by netspooky 2022-11-05
+-- Requires xx v0.4.4 or later
+-- This is a NetPBM file of a Tamagotchi sprite. 
+-- Uses 0y binary representation for pixels
+-- Generates mametchi.030270c4.bin, can use -o mametchi.pbm and open in an image viewer.
+"P4"
+0a "16 14" 0a
+0y00111000 0y00011100 
+0y01111100 0y00111110 
+0y00111111 0y11111100 
+0y00100000 0y00000100 
+0y01001100 0y00110010 
+0y01010010 0y01001010 
+0y00100001 0y10000100 
+0y01011111 0y11111010 
+0y01000000 0y00000010 
+0y01100000 0y00000110 
+0y00011000 0y00011000 
+0y00001000 0y00010000 
+0y00010011 0y11001000 
+0y00011100 0y00111000

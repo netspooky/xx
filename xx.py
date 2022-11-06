@@ -8,7 +8,7 @@ parser.add_argument('-x', dest='dumpHex', help='Dump hex instead of writing file
 parser.add_argument('-o', dest='outFile', help='Output Filename')
 parser.add_argument('-r', dest='rawOut', help='Dump buffer to stdout instead of writing file', action="store_true")
 
-xxVersion = "0.4.3"
+xxVersion = "0.4.4"
 
 # Comments - The box drawing comments are generated when checking a token
 asciiComments = [ "#", ";", "%", "|","\x1b", "-", "/" ]
@@ -28,18 +28,19 @@ class xxToken:
         self.normData = inData # This is where normalized data goes and is what is modified as the token is parsed
         self.normDataLen = len(inData) # This will be modified if normData is modified
         self.isHexString = 0 # This means that it's a classic hex string like 41414141
+        self.isBinary = 0
         self.isString = isString
         self.isAscii = 0 # This supercedes isUtf8 because all Python3 strings are technically UTF-8
         self.isUtf8 = 0 # If the line contains UTF8 data this can go here
         self.isShiftJis = 0 # !! UNUSED, will figure out a way to implement
         self.isComment = isComment # This tracks if the token itself should be classified as a comment
         self.hasComment = 0 # This tracks if the token contains a comment, and everything else after is a comment
-        self.commentOffset = 0 # !! UNUSED, was going to track where in the token the comment occured
+        #REMOVEself.commentOffset = 0 # !! UNUSED, was going to track where in the token the comment occured
         self.isStart = 0   # For strings, this is set to 1 if it's the beginning of a string
         self.needsMore = needsMore # Since strings can have spaces, if it's split up, it can be reconstructed here
         self.isEnd = 0     # If the line ends with a double quote, this is marked as the end
         self.hexData = ""  # This is the fully parsed hex data that is passed to the main buffer to output
-        self.hexDataLen = 0 # !! UNUSED, The length of the hex data, should match the length of normData
+        #REMOVEself.hexDataLen = 0 # !! UNUSED, The length of the hex data, should match the length of normData
     def __str__(self):
         byterepr = bytes(self.rawData, 'latin1')
         return f"t\"{byterepr}\""
@@ -139,6 +140,16 @@ class xxToken:
                 if self.isEnd:
                     tempString = tempString.split('"')[0]
                 self.hexData = ascii2hex(tempString)
+    def testBinary(self):
+        if self.isString == False:
+            if len(self.normData) == 10:
+                if self.normData[0:2] == "0y":
+                    bindata = self.normData[2:]
+                    for c in bindata:
+                        if (c != "0") and (c != "1"):
+                            return
+                    self.normData = "{:02x}".format(int(bindata, 2))
+
 ################################################################################
 def getTokenAttributes(inTok):
     """
@@ -148,6 +159,7 @@ def getTokenAttributes(inTok):
     inTok.testUtf8()
     inTok.testString() # Remove this whole test
     inTok.testComment()
+    inTok.testBinary()
     inTok.testHexData()
     inTok.getHexFromString()
 

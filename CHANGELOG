@@ -1,5 +1,8 @@
 CHANGELOG
 
+v0.4.4 [2022-11-05]
+- Added 0y binary representation and mametchi.xx to demonstrate it.
+
 v0.4.3 [2022-11-05]
 - Added -o flag to choose a filename output. Default behavior the same
 - Added -r flag to output to stdout instead of a file.
