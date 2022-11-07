@@ -37,6 +37,7 @@ The primary format for data is ASCII hex bytes. These can be represented in a nu
     46h 46h 46h 46h        -- asm style
     47:47:47:47            -- MAC Address style
     "This is a string"     -- Plain old string, must use double quotes!
+    0y01010101             -- Binary numbers, put "0y" at the start, followed by 8 bits, then a space or new line after.
 
 Output:
 
