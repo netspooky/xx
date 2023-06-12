@@ -1,0 +1,46 @@
+        |\  /|  /\  /~~|~~\ /~~\ /~~\
+        | \/ | /__\|   |__/|    |`--.
+        |    |/    \\__|  \ \__/ \__/
+                             
+                                           
+             |\      _,,,---,,_
+      -ZZZzz /,`.-'`'    -.  ;-;;,_
+            |,4-  ) )-,_. ,\ (   `'-'
+           -'---''(_/--'  `-'\_)
+
+┌─ Macros ───────────────────────────────────────────────────────────
+│ xx now supports preprocessed macros~
+│ They're in Lisp-esque syntax and have a certain pattern:
+| (MACRO ARG1 ARG2 ... )
+│ There's one single predefined macro and it is $DEF NAME BODY,
+| it defines a macro and is our only interface with the macro system.
+└───────────────────────────┐
+( $DEF COM "4D 45 4F 57" )  | <-- Here we define macro magic COM
+( $DEF SMB "FF534D42" )     |     Macros expand to xx syntax
+( $DEF MBR "55 AA")         |     Ä<       Hail Lisp          >Ä
+┌───────────────────────────┘
+│ Let's invoke some macros!
+└────────────────────────────────┐
+(COM)  ; Expands to MEOW         |
+                                 |
+┌─ Macro Functions ──────────────┘
+│ Defining simple macros is nice but there's much more to it.
+│ You can define macro functions that operate on data,
+| Code starts with py followed by minified python function <3
+└─────────────────────────────────────────────────────-──────────────
+( $DEF $INC py'λ x : int(x,) + 1' ) -- Macros need to return a function, easiest way is to define a lambda function.
+                                    -- All parameters are text - cast type as you wish
+                                    -- In order to simplify the syntax both \. and λ expand to lambda :D
+( $INC 19 )  --> 20
+( $INC 48 )  --> 111
+
+( $DEF $ADDHEX py'λ a, b : hex(int(a, 0)+int(b, 0))' )
+( $ADDHEX 0x40 0xD )
+( $ADDHEX 0x1a 6 )
+
+( $DEF $REPEAT py'λ s, n : s*int(n,0)')
+C($REPEAT A 0xFF)T // >:3
+
+( $DEF $MODULE_CALL py'λ m, f, *args: getattr(__import__(m), f)(*args)')
+"Here are your files: ( $MODULE_CALL 'os' 'listdir' '.' )" // These Macros are inherently unsafe 
+                                                           // although could be integrated with interesting modules (pyasm)

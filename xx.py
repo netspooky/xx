@@ -8,6 +8,7 @@ parser.add_argument('inFile', help='File to open')
 parser.add_argument('-x', dest='dumpHex', help='Dump hex instead of writing file', action="store_true")
 parser.add_argument('-o', dest='outFile', help='Output Filename')
 parser.add_argument('-r', dest='rawOut', help='Dump buffer to stdout instead of writing file', action="store_true")
+parser.add_argument('-m', dest='macroEnable', help='Enables macro support for advanced use (UNSAFE)', action="store_true")
 
 xxVersion = "0.5"
 
@@ -151,7 +152,6 @@ class xxMacroProcessor:
         while True:
             match = re.search(pattern, line)
             if match:
-                print('match')
                 macro = match.group(1)
                 args = shlex.split(match.group(2))  # Parse arguments, handling quoted strings
                 try:
@@ -171,8 +171,8 @@ class xxMacroProcessor:
                     exit()
                 if replacement is None:
                     replacement = ""
-
-                line = line[:match.start()] + replacement + line[match.end():]
+                
+                line = line[:match.start()] + str(replacement) + line[match.end():]
             else:
                 break
 
@@ -342,8 +342,8 @@ def tokenizeXX(xxline, lineNum):
     tokens.append(xxToken(buf, lineNum, False, isString)) # Append last token on EOL
     return tokens
 
-def parseXX(xxFile):
-    macro_processor = xxMacroProcessor()
+def parseXX(xxFile, macroEnable):
+    if macroEnable: macro_processor = xxMacroProcessor()
     xxOut = b"" 
     lineNum = 0
     joinedLine = ""
@@ -353,7 +353,8 @@ def parseXX(xxFile):
         multilineComment, joinedLine, line, mustContinue = filterMultLineComments(multilineComment, joinedLine, line)
         if mustContinue:
             continue
-        # line = macro_processor.process_macros(line) # (Pre)Process line using macros
+        
+        if macroEnable: line = macro_processor.process_macros(line) # (Pre)Process line using macros
         lineTokens = tokenizeXX(line, lineNum)
         isComment = 0
         linesHexData = ""
@@ -372,9 +373,10 @@ if __name__ == '__main__':
     dumpHex = args.dumpHex
     outFile = args.outFile
     rawOut = args.rawOut
+    macroEnable = args.macroEnable
     with open(inFile,"r") as f:
         xxFileLines = f.readlines()
-    out = parseXX(xxFileLines)
+    out = parseXX(xxFileLines, macroEnable)
     if dumpHex:
         dHex(out)
     elif rawOut:
