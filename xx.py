@@ -1,12 +1,14 @@
 import sys
 import hashlib
 import argparse
+import re, shlex, dis # Macro dependencies
 
 parser = argparse.ArgumentParser(description="xx")
 parser.add_argument('inFile', help='File to open')
 parser.add_argument('-x', dest='dumpHex', help='Dump hex instead of writing file', action="store_true")
 parser.add_argument('-o', dest='outFile', help='Output Filename')
 parser.add_argument('-r', dest='rawOut', help='Dump buffer to stdout instead of writing file', action="store_true")
+parser.add_argument('-m', dest='macroEnable', help='Enables macro support for advanced use (UNSAFE)', action="store_true")
 
 xxVersion = "0.5"
 
@@ -112,6 +114,69 @@ class xxToken:
                         if (c != "0") and (c != "1"):
                             return
                     self.normData = "{:02x}".format(int(bindata, 2))
+
+class xxMacroProcessor:
+    """
+    Macro (pre)processor for xx language.
+    """
+    def __init__(self):
+        self.macros = {}
+        self.define_macro("$DEF", self.def_macro)
+
+    def define_macro(self, name, body):
+        """
+        Defines a macro with the given name and body (can be an atom or function)
+        """
+        self.macros[name] = body
+
+    def def_macro(self, name, body):
+        """
+        Internal macro definition function used for "$DEF" macro. If macro body starts with 'py' it is python code.
+        """
+        val = body
+        if body.startswith("py"):
+            val = eval(re.sub("λ|\\\.", "lambda", body[2:]))
+        self.define_macro(name, val)
+
+    def process_macros(self, line):
+        """
+        Processes macros in the given line and returns the resulting line. It implements it's own parsing using regex for better or worse.
+        """
+        # Remove comments from the line
+        for comment in asciiComments + twoCharComments:
+            line = line.split(comment)[0]
+
+        # Define the pattern to match macros - example: (MACRO ARG1 ARG2 ...)
+        pattern = r'(?<!\\)\([\s*]*([A-Za-z|$|@]\S*\b)((?:\s*"[^"]*"|\s*\S*)*)\s*\)'
+
+        while True:
+            match = re.search(pattern, line)
+            if match:
+                macro = match.group(1)
+                args = shlex.split(match.group(2))  # Parse arguments, handling quoted strings
+                try:
+                    val = self.macros[macro]
+                    if callable(val):
+                        replacement = val(*args)
+                    else:
+                        replacement = str(val)
+                except LookupError:
+                    print(f"> {line} -> {macro} doesn't exist!")
+                    exit()
+                except SyntaxError:
+                    print(f"> {line} -> syntax error at macro definition")
+                    exit()
+                except Exception as e:
+                    print(f"> {line} -> {e}")
+                    exit()
+                if replacement is None:
+                    replacement = ""
+                
+                line = line[:match.start()] + str(replacement) + line[match.end():]
+            else:
+                break
+
+        return line
 
 ################################################################################
 def getTokenAttributes(inTok):
@@ -277,7 +342,8 @@ def tokenizeXX(xxline, lineNum):
     tokens.append(xxToken(buf, lineNum, False, isString)) # Append last token on EOL
     return tokens
 
-def parseXX(xxFile):
+def parseXX(xxFile, macroEnable):
+    if macroEnable: macro_processor = xxMacroProcessor()
     xxOut = b"" 
     lineNum = 0
     joinedLine = ""
@@ -287,6 +353,8 @@ def parseXX(xxFile):
         multilineComment, joinedLine, line, mustContinue = filterMultLineComments(multilineComment, joinedLine, line)
         if mustContinue:
             continue
+        
+        if macroEnable: line = macro_processor.process_macros(line) # (Pre)Process line using macros
         lineTokens = tokenizeXX(line, lineNum)
         isComment = 0
         linesHexData = ""
@@ -305,9 +373,10 @@ if __name__ == '__main__':
     dumpHex = args.dumpHex
     outFile = args.outFile
     rawOut = args.rawOut
+    macroEnable = args.macroEnable
     with open(inFile,"r") as f:
         xxFileLines = f.readlines()
-    out = parseXX(xxFileLines)
+    out = parseXX(xxFileLines, macroEnable)
     if dumpHex:
         dHex(out)
     elif rawOut:
